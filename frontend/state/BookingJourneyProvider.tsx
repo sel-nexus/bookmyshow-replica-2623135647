@@ -28,7 +28,7 @@ export interface BookingJourneyState {
   setPhase: (phase: JourneyPhase) => void;
   setSelectedMovie: (movie: Movie | null) => void;
   setSelectedTheatre: (theatre: Theatre | null) => void;
-  selectFixedSeats: () => void;
+  toggleSeat: (seat: string) => void;
   setPaymentMethod: (paymentMethod: 'CARD' | 'UPI' | null) => void;
   setConfirmation: (confirmation: BookingConfirmation | null) => void;
 }
@@ -65,7 +65,19 @@ export function BookingJourneyProvider({ children }: { children: ReactNode }) {
       setTotalPrice(0);
     },
     setSelectedTheatre,
-    selectFixedSeats: () => { setSelectedSeatIds(['A1', 'A2', 'A3']); setTotalPrice(450); },
+    toggleSeat: (seat) => {
+      setSelectedSeatIds((currentSeats) => {
+        if (currentSeats.includes(seat)) {
+          const nextSeats = currentSeats.filter((currentSeat) => currentSeat !== seat);
+          setTotalPrice(nextSeats.length * 150);
+          return nextSeats;
+        }
+        if (currentSeats.length === 3) return currentSeats;
+        const nextSeats = [...currentSeats, seat];
+        setTotalPrice(nextSeats.length * 150);
+        return nextSeats;
+      });
+    },
     setPaymentMethod, setConfirmation,
   }), [mobileNumber, token, user, selectedCity, selectedMovieId, selectedMovie, selectedTheatreId, selectedTheatre, selectedShowtimeId, selectedSeatIds, totalPrice, paymentMethod, confirmation, confirmationId, phase]);
 

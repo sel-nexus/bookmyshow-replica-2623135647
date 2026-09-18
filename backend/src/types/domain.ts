@@ -43,7 +43,7 @@ export interface BookingRequest {
   theatreId: number;
   seats: string[];
   paymentMethod: 'CARD' | 'UPI';
-  totalPrice: 450;
+  totalPrice: number;
 }
 
 /** Represent the persisted booking details returned after a committed write. */

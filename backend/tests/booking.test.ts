@@ -10,7 +10,7 @@ import { seedDiscovery } from '../src/db/seed';
 import { createApp } from '../src/server';
 
 const testConfig: AppConfig = { PORT: 4000, SQLITE_PATH: '', JWT_SIGNING_SECRET: 'test-signing-secret-that-is-long-enough', CORS_ORIGIN: 'http://127.0.0.1:3000', LOG_LEVEL: 'error' };
-const validBooking = { mobileNumber: '9999999999', movieId: 1, theatreId: 1, seats: ['A1', 'A2', 'A3'], paymentMethod: 'CARD', totalPrice: 450 };
+const validBooking = { mobileNumber: '9999999999', movieId: 1, theatreId: 1, seats: ['B2', 'B3', 'B4'], paymentMethod: 'CARD', totalPrice: 450 };
 
 /** Create a unique durable SQLite path for each booking test. */
 function testDatabasePath(): string { return join(tmpdir(), `bookmyshow-booking-${Date.now()}-${Math.random().toString(36).slice(2)}.db`); }
@@ -33,8 +33,8 @@ describe('booking API', () => {
   it('commits a full booking confirmation and persists canonical values', async () => {
     const response = await request(createApp(database, testConfig)).post('/api/bookings').send(validBooking);
     expect(response.status).toBe(201);
-    expect(response.body.data).toEqual({ bookingId: 1, confirmationId: 'BMS-1', movie: { id: 1, title: 'Paradise' }, theatre: { id: 1, name: 'Sandhya 70mm' }, seats: ['A1', 'A2', 'A3'], paymentMethod: 'CARD', totalPrice: 450 });
-    expect(database.prepare('SELECT user_id, movie_id, theatre_id, seats, payment_method, total_price FROM bookings').get()).toEqual({ user_id: 1, movie_id: 1, theatre_id: 1, seats: '["A1","A2","A3"]', payment_method: 'CARD', total_price: 450 });
+    expect(response.body.data).toEqual({ bookingId: 1, confirmationId: 'BMS-1', movie: { id: 1, title: 'Paradise' }, theatre: { id: 1, name: 'Sandhya 70mm' }, seats: ['B2', 'B3', 'B4'], paymentMethod: 'CARD', totalPrice: 450 });
+    expect(database.prepare('SELECT user_id, movie_id, theatre_id, seats, payment_method, total_price FROM bookings').get()).toEqual({ user_id: 1, movie_id: 1, theatre_id: 1, seats: '["B2","B3","B4"]', payment_method: 'CARD', total_price: 450 });
   });
 
   it('retrieves the exact persisted confirmation after creating a booking', async () => {
@@ -62,8 +62,10 @@ describe('booking API', () => {
   });
 
   it.each([
-    { ...validBooking, seats: ['A2', 'A1', 'A3'] },
-    { ...validBooking, totalPrice: 449 },
+    { ...validBooking, seats: ['B2', 'B2', 'B4'] },
+    { ...validBooking, seats: ['B2', 'B3'] },
+    { ...validBooking, seats: ['B2', 'B3', 'Z9'] },
+    { ...validBooking, totalPrice: -1 },
     { ...validBooking, paymentMethod: 'CASH' },
   ])('rejects tampered booking values without writing a row', async (payload) => {
     const response = await request(createApp(database, testConfig)).post('/api/bookings').send(payload);
