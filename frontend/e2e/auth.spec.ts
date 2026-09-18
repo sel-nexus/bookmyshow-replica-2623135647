@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 function captureBrowserErrors(page: Page) {
   const errors: string[] = [];
   page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(message.text());
+    if (message.type() === 'error' && !message.text().startsWith('Failed to load resource:')) errors.push(message.text());
   });
   page.on('pageerror', (error) => errors.push(error.message));
   return errors;

@@ -7,8 +7,8 @@
 
 ## 1. Executive Summary
 
-- **Total Components**: `195`
-- **Total Connections**: `243`
+- **Total Components**: `293`
+- **Total Connections**: `495`
 - **Subsystem Modules**: `1`
 - **Dependency Types**: `9`
 
@@ -16,14 +16,14 @@
 
 | # | Component | File | Type | Connections |
 |---|-----------|------|------|-------------|
-| 1 | `server.ts` | `backend/src/server.ts` | file | 15 |
-| 2 | `compilerOptions` | `frontend/tsconfig.json` | function | 15 |
-| 3 | `auth.test.tsx` | `frontend/tests/auth.test.tsx` | function | 12 |
-| 4 | `devDependencies` | `backend/package.json` | function | 11 |
-| 5 | `compilerOptions` | `backend/tsconfig.json` | function | 11 |
-| 6 | `devDependencies` | `frontend/package.json` | function | 11 |
-| 7 | `BookingJourneyProvider.tsx` | `frontend/state/BookingJourneyProvider.tsx` | class | 11 |
-| 8 | `auth.test.ts` | `backend/tests/auth.test.ts` | file | 10 |
+| 1 | `server.ts` | `backend/src/server.ts` | file | 35 |
+| 2 | `api.ts` | `frontend/lib/api.ts` | file | 28 |
+| 3 | `BookingJourneyProvider.tsx` | `frontend/state/BookingJourneyProvider.tsx` | class | 20 |
+| 4 | `domain.ts` | `backend/src/types/domain.ts` | file | 17 |
+| 5 | `useBookingJourney()` | `frontend/state/BookingJourneyProvider.tsx` | method | 17 |
+| 6 | `compilerOptions` | `frontend/tsconfig.json` | function | 15 |
+| 7 | `discovery.test.tsx` | `frontend/tests/discovery.test.tsx` | function | 13 |
+| 8 | `booking.test.ts` | `backend/tests/booking.test.ts` | file | 12 |
 
 ---
 
@@ -33,30 +33,35 @@
 
 | Relationship | Count | Share |
 |-------------|-------|-------|
-| `contains` | 120 | 49% |
-| `imports` | 59 | 24% |
-| `imports_from` | 26 | 11% |
-| `extends` | 12 | 5% |
-| `calls` | 9 | 4% |
-| `method` | 7 | 3% |
-| `references` | 6 | 2% |
-| `indirect_call` | 2 | 1% |
-| `conceptually_related_to` | 2 | 1% |
+| `contains` | 177 | 36% |
+| `imports` | 136 | 27% |
+| `imports_from` | 80 | 16% |
+| `calls` | 38 | 8% |
+| `references` | 26 | 5% |
+| `method` | 23 | 5% |
+| `extends` | 12 | 2% |
+| `indirect_call` | 2 | 0% |
+| `rationale_for` | 1 | 0% |
 
 ### Hub Dependency Diagram
 
 ```mermaid
 flowchart TD
     backend_src_server["server.ts"]
-    frontend_tsconfig_compileroptions["compilerOptions"]
-    frontend_tests_auth_test["auth.test.tsx"]
-    backend_package_devdependencies["devDependencies"]
-    backend_tsconfig_compileroptions["compilerOptions"]
-    frontend_package_devdependencies["devDependencies"]
+    frontend_lib_api["api.ts"]
     frontend_state_bookingjourneyprovider["BookingJourneyProvider.tsx"]
-    backend_tests_auth_test["auth.test.ts"]
-    backend_src_server <--> backend_tests_auth_test
-    frontend_state_bookingjourneyprovider <--> frontend_tests_auth_test
+    backend_src_types_domain["domain.ts"]
+    frontend_state_bookingjourneyprovider_usebookingjourney["useBookingJourney()"]
+    frontend_tsconfig_compileroptions["compilerOptions"]
+    frontend_tests_discovery_test["discovery.test.tsx"]
+    backend_tests_booking_test["booking.test.ts"]
+    backend_src_server <--> backend_src_types_domain
+    backend_src_server <--> backend_tests_booking_test
+    frontend_lib_api <--> frontend_state_bookingjourneyprovider
+    frontend_lib_api <--> frontend_tests_discovery_test
+    frontend_state_bookingjourneyprovider <--> frontend_state_bookingjourneyprovider_usebookingjourney
+    frontend_state_bookingjourneyprovider <--> frontend_tests_discovery_test
+    frontend_state_bookingjourneyprovider_usebookingjourney <--> frontend_tests_discovery_test
 ```
 
 ### Most Connected Pairs
@@ -78,22 +83,24 @@ flowchart TD
 
 ## 3. Subsystem & Module Breakdown
 
-### 3.1 backend
-**Nodes**: `195`  
-**Files**: `.engine/memory/progress_summary.md`, `.engine/workers/df7ba8910e0c/memory/progress_summary.md`, `.engine/workers/df7ba8910e0c/scratch/findings.md`, `backend/package.json`, `backend/src/config.ts`, `backend/src/db/database.ts` +21 more
+### 3.1 frontend
+**Nodes**: `293`  
+**Files**: `backend/package.json`, `backend/src/config.ts`, `backend/src/db/database.ts`, `backend/src/db/seed.ts`, `backend/src/middleware/errorHandler.ts`, `backend/src/middleware/requestContext.ts` +46 more
 
 | Component | Type | File | Connections |
 |-----------|------|------|-------------|
-| `server.ts` | file | `backend/src/server.ts` | 15 |
+| `server.ts` | file | `backend/src/server.ts` | 35 |
+| `api.ts` | file | `frontend/lib/api.ts` | 28 |
+| `BookingJourneyProvider.tsx` | class | `frontend/state/BookingJourneyProvider.tsx` | 20 |
+| `domain.ts` | file | `backend/src/types/domain.ts` | 17 |
+| `useBookingJourney()` | method | `frontend/state/BookingJourneyProvider.tsx` | 17 |
 | `compilerOptions` | function | `frontend/tsconfig.json` | 15 |
+| `discovery.test.tsx` | function | `frontend/tests/discovery.test.tsx` | 13 |
+| `booking.test.ts` | file | `backend/tests/booking.test.ts` | 12 |
+| `checkout/page.tsx` | function | `frontend/app/checkout/page.tsx` | 12 |
 | `auth.test.tsx` | function | `frontend/tests/auth.test.tsx` | 12 |
-| `devDependencies` | function | `backend/package.json` | 11 |
-| `compilerOptions` | function | `backend/tsconfig.json` | 11 |
-| `devDependencies` | function | `frontend/package.json` | 11 |
-| `BookingJourneyProvider.tsx` | class | `frontend/state/BookingJourneyProvider.tsx` | 11 |
-| `auth.test.ts` | file | `backend/tests/auth.test.ts` | 10 |
-| `api.ts` | file | `frontend/lib/api.ts` | 10 |
-| `AuthService` | class | `backend/src/services/authService.ts` | 9 |
+
+**External dependencies:** `NOTE: This file should not be edited` (1)
 
 
 ---
@@ -102,18 +109,18 @@ flowchart TD
 
 Public classes and functions by subsystem.
 
-### backend
+### frontend
 
 | Name | Type | File | Connections |
 |------|------|------|-------------|
+| `BookingJourneyProvider.tsx` | class | `frontend/state/BookingJourneyProvider.tsx` | 20 |
 | `compilerOptions` | function | `frontend/tsconfig.json` | 15 |
+| `discovery.test.tsx` | function | `frontend/tests/discovery.test.tsx` | 13 |
+| `checkout/page.tsx` | function | `frontend/app/checkout/page.tsx` | 12 |
 | `auth.test.tsx` | function | `frontend/tests/auth.test.tsx` | 12 |
 | `devDependencies` | function | `backend/package.json` | 11 |
 | `compilerOptions` | function | `backend/tsconfig.json` | 11 |
 | `devDependencies` | function | `frontend/package.json` | 11 |
-| `BookingJourneyProvider.tsx` | class | `frontend/state/BookingJourneyProvider.tsx` | 11 |
-| `AuthService` | class | `backend/src/services/authService.ts` | 9 |
-| `dependencies` | function | `backend/package.json` | 8 |
 
 ---
 
@@ -123,27 +130,39 @@ Public classes and functions by subsystem.
 
 | Type | Count | Share |
 |------|-------|-------|
-| function | 131 | 67% |
-| class | 29 | 15% |
-| method | 21 | 11% |
-| file | 14 | 7% |
+| function | 145 | 49% |
+| class | 60 | 20% |
+| method | 58 | 20% |
+| file | 30 | 10% |
+
+### High-Connectivity Hotspots
+
+**5** component(s) with >15 connections:
+
+| Component | File | Connections |
+|-----------|------|-------------|
+| `server.ts` | `backend/src/server.ts` | 35 |
+| `api.ts` | `frontend/lib/api.ts` | 28 |
+| `BookingJourneyProvider.tsx` | `frontend/state/BookingJourneyProvider.tsx` | 20 |
+| `domain.ts` | `backend/src/types/domain.ts` | 17 |
+| `useBookingJourney()` | `frontend/state/BookingJourneyProvider.tsx` | 17 |
 
 ### Dependency Cycles
 
-**56** circular dependency loop(s) detected:
+**212** circular dependency loop(s) detected:
 
 | # | Cycle Path |
 |---|-----------|
-| 1 | `frontend_state_bookingjourneyprovider → frontend_state_bookingjourneyprovider_bookingjourneyprovider → frontend_tests_auth_test` |
-| 2 | `frontend_state_bookingjourneyprovider → frontend_app_layout → frontend_state_bookingjourneyprovider_bookingjourneyprovider` |
-| 3 | `frontend_components_loginform → frontend_state_bookingjourneyprovider → frontend_tests_auth_test` |
-| 4 | `frontend_components_otpform → frontend_state_bookingjourneyprovider → frontend_tests_auth_test` |
-| 5 | `frontend_lib_api → frontend_state_bookingjourneyprovider → frontend_tests_auth_test` |
-| 6 | `frontend_components_loginform → frontend_state_bookingjourneyprovider_usebookingjourney → frontend_state_bookingjourneyprovider` |
-| 7 | `frontend_components_loginform_loginform → frontend_state_bookingjourneyprovider_usebookingjourney → frontend_state_bookingjourneyprovider → frontend_tests_auth_test` |
-| 8 | `frontend_components_otpform → frontend_state_bookingjourneyprovider_usebookingjourney → frontend_state_bookingjourneyprovider` |
-| 9 | `frontend_components_otpform_otpform → frontend_state_bookingjourneyprovider_usebookingjourney → frontend_state_bookingjourneyprovider → frontend_tests_auth_test` |
-| 10 | `frontend_lib_api_authuser → frontend_state_bookingjourneyprovider_bookingjourneystate → frontend_state_bookingjourneyprovider` |
+| 1 | `frontend_state_bookingjourneyprovider_usebookingjourney → frontend_tests_discovery_test_authenticatedjourney → frontend_tests_discovery_test` |
+| 2 | `frontend_state_bookingjourneyprovider_usebookingjourney → frontend_tests_checkout_test_readyjourney → frontend_package_dependencies_react → frontend_tests_discovery_test_authenticatedjourney` |
+| 3 | `frontend_lib_api → frontend_tests_checkout_test → frontend_tests_checkout_test_readyjourney → frontend_package_dependencies_react → frontend_tests_discovery_test_authenticatedjourney → frontend_tests_discovery_test` |
+| 4 | `frontend_state_bookingjourneyprovider → frontend_tests_checkout_test → frontend_tests_checkout_test_readyjourney → frontend_package_dependencies_react → frontend_tests_discovery_test_authenticatedjourney → frontend_tests_discovery_test` |
+| 5 | `frontend_state_bookingjourneyprovider_bookingjourneyprovider → frontend_tests_checkout_test → frontend_tests_checkout_test_readyjourney → frontend_package_dependencies_react → frontend_tests_discovery_test_authenticatedjourney → frontend_tests_discovery_test` |
+| 6 | `frontend_state_bookingjourneyprovider_usebookingjourney → frontend_tests_checkout_test → frontend_tests_checkout_test_readyjourney` |
+| 7 | `frontend_app_checkout_page → frontend_lib_api_createbooking → frontend_tests_checkout_test` |
+| 8 | `frontend_app_checkout_page_checkoutpage → frontend_lib_api_createbooking → frontend_tests_checkout_test` |
+| 9 | `frontend_lib_api → frontend_lib_api_createbooking → frontend_tests_checkout_test` |
+| 10 | `frontend_lib_api → frontend_tests_api_test → frontend_lib_api_createbooking` |
 
 ### Orphaned Components
 
@@ -151,8 +170,8 @@ Public classes and functions by subsystem.
 
 | Component | File |
 |-----------|------|
-| `auth.spec.ts` | `frontend/e2e/auth.spec.ts` |
-| `SQLite Native Binding Blocker` | `.engine/workers/df7ba8910e0c/memory/progress_summary.md` |
+| `playwright.config.ts` | `frontend/playwright.config.ts` |
+| `Booking Confirmation Screenshot` | `frontend/e2e/screenshots/booking-confirmation.png` |
 
 ---
 

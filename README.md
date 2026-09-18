@@ -1,6 +1,6 @@
 # BookMyShow Replica
 
-A small full-stack cinema booking flow with OTP sign-in, backend-seeded discovery, fixed seating, payment-method selection, and transactional SQLite confirmations.
+A small full-stack cinema booking flow with public entry, strict OTP sign-in, backend-seeded discovery, interactive three-seat selection, dummy Card/UPI checkout, and transactional SQLite confirmations.
 
 ## Requirements
 
@@ -28,12 +28,12 @@ Open `http://localhost:3000`. The browser always requests `/api/...` on its own 
 
 ## Demo journey
 
-1. Enter any nonempty mobile number.
-2. Enter OTP `1234`.
-3. Choose a movie and one of its mapped theatres.
-4. Select seats (always `A1`, `A2`, `A3` for `Rs.450`).
-5. Choose Card or UPI. Payment entry fields are display-only and are never submitted.
-6. Select **Pay Rs.450** and wait two seconds for confirmation.
+1. Start on the public landing page and select **Book tickets** or **Login**.
+2. Enter exactly 10 numeric mobile digits, then enter demo OTP `1234`.
+3. Choose a backend-served movie and one of its mapped theatres.
+4. Select exactly three distinct available seats from the labelled grid; the total updates at Rs.150 per seat.
+5. Choose Card (13–19 digits with Luhn validation) or UPI (independent of Card validation). Payment values are never submitted.
+6. Select **Pay** and wait two seconds for the persisted confirmation response.
 
 ## Tests and type checks
 
@@ -58,11 +58,11 @@ node node_modules/@playwright/test/cli.js test --config playwright.config.ts
 ## API routes
 
 - `GET /api/health`
-- `POST /api/auth/login` — `{ mobileNumber }`
+- `POST /api/auth/login` — `{ mobileNumber }`, where `mobileNumber` is exactly 10 numeric digits
 - `POST /api/auth/verify` — `{ mobileNumber, otp: "1234" }`
 - `GET /api/movies`
 - `GET /api/theatres?movieId=1`
-- `POST /api/bookings` — `{ mobileNumber, movieId, theatreId, seats: ["A1","A2","A3"], paymentMethod: "CARD"|"UPI", totalPrice: 450 }`
+- `POST /api/bookings` — `{ mobileNumber, movieId, theatreId, seats: ["B2","B3","B4"], paymentMethod: "CARD"|"UPI", totalPrice: 450 }`; accepts exactly three distinct available seat labels and a non-negative calculated total
 - `GET /api/bookings/:bookingId` — retrieves a committed confirmation for reload recovery.
 
 A successful booking returns `201` only after SQLite commits. Invalid booking details return `400 INVALID_BOOKING`; missing users, entities, or movie-theatre mappings return `404 ENTITY_NOT_FOUND`; unexpected write errors return `500 BOOKING_WRITE_FAILED` after rollback.

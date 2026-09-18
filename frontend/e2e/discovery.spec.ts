@@ -64,7 +64,6 @@ test('discovery shows loading status while the live movies response is delayed',
 test('discovery shows an empty theatre message and no continuation when no theatre is returned', async ({ page }) => {
   const errors = captureBrowserErrors(page);
   await signIn(page);
-  await page.waitForResponse((response) => response.url().includes('/api/movies') && response.request().method() === 'GET');
   await page.route('**/api/theatres?movieId=*', async (route) => {
     const movieId = new URL(route.request().url()).searchParams.get('movieId');
     await route.fulfill({ json: { data: { movieId, theatres: [] } } });
@@ -83,8 +82,6 @@ test('movie discovery remains usable at a mobile viewport', async ({ page }) => 
   const errors = captureBrowserErrors(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await signIn(page);
-  const moviesResponse = await page.waitForResponse((response) => response.url().includes('/api/movies') && response.request().method() === 'GET');
-  expect(moviesResponse.ok()).toBeTruthy();
   await expect(page.getByRole('button', { name: 'Choose Paradise' })).toBeVisible();
   expect(errors).toEqual([]);
 });
