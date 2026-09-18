@@ -2,7 +2,7 @@ import express, { type Application, type NextFunction, type Request, type Respon
 import cors from 'cors';
 import helmet from 'helmet';
 import type Database from 'better-sqlite3';
-import { appConfig, type AppConfig } from './config';
+import { loadConfig, type AppConfig } from './config';
 import { createDatabase } from './db/database';
 import { seedDiscovery } from './db/seed';
 import { errorHandler } from './middleware/errorHandler';
@@ -46,11 +46,12 @@ export function createApp(database: Database.Database, configuration: AppConfig)
 
 /** Start the configured production HTTP server. */
 export function startServer(): void {
-  const database = createDatabase(appConfig.SQLITE_PATH);
+  const configuration = loadConfig();
+  const database = createDatabase(configuration.SQLITE_PATH);
   seedDiscovery(database);
-  const app = createApp(database, appConfig);
-  app.listen(appConfig.PORT, () => {
-    console.info(`BookMyShow API listening on port ${appConfig.PORT}`);
+  const app = createApp(database, configuration);
+  app.listen(configuration.PORT, () => {
+    console.info(`BookMyShow API listening on port ${configuration.PORT}`);
   });
 }
 

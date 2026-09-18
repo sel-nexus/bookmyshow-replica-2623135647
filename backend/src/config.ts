@@ -18,6 +18,3 @@ export type AppConfig = z.infer<typeof environmentSchema>;
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppConfig {
   return environmentSchema.parse(environment);
 }
-
-/** Exposes the process configuration for normal application startup. */
-export const appConfig = loadConfig();
