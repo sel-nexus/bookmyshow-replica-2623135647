@@ -53,7 +53,7 @@ describe('discovery API', () => {
   it('returns empty results from a real empty database and for a movie with no theatre mapping', async () => {
     const app = createApp(database, testConfig);
     expect((await request(app).get('/api/movies')).body).toEqual({ data: { movies: [] } });
-    database.prepare("INSERT INTO movies (title, duration_minutes, language) VALUES ('Unmapped', 120, 'Telugu')").run();
+    database.prepare("INSERT INTO movies (title) VALUES ('Unmapped')").run();
     expect((await request(app).get('/api/theatres?movieId=1')).body).toEqual({ data: { movieId: 1, theatres: [] } });
   });
 });

@@ -9,8 +9,11 @@ import { errorHandler } from './middleware/errorHandler';
 import { requestContext } from './middleware/requestContext';
 import { createAuthRouter } from './routers/authRouter';
 import { createDiscoveryRouter } from './routers/discoveryRouter';
+import { createBookingRouter } from './routers/bookingRouter';
+import { BookingRepository } from './repositories/bookingRepository';
 import { DiscoveryRepository } from './repositories/discoveryRepository';
 import { AuthService } from './services/authService';
+import { BookingService } from './services/bookingService';
 import { DiscoveryService } from './services/discoveryService';
 
 /** Create the Express application with injectable dependencies for file-backed database tests. */
@@ -18,6 +21,7 @@ export function createApp(database: Database.Database, configuration: AppConfig)
   const app = express();
   const authService = new AuthService(database, configuration.JWT_SIGNING_SECRET);
   const discoveryService = new DiscoveryService(new DiscoveryRepository(database));
+  const bookingService = new BookingService(database, new BookingRepository(database));
 
   app.use(requestContext);
   app.use(helmet());
@@ -34,6 +38,7 @@ export function createApp(database: Database.Database, configuration: AppConfig)
   });
   app.use('/api/auth', createAuthRouter(authService));
   app.use('/api', createDiscoveryRouter(discoveryService));
+  app.use('/api', createBookingRouter(bookingService));
   app.use(errorHandler);
   return app;
 }

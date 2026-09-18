@@ -35,11 +35,24 @@ export class AppError extends Error {
   }
 }
 
-/** Represents future booking choices held during the customer journey. */
-export interface BookingSelection {
-  city: string | null;
-  movieId: number | null;
-  theatreId: number | null;
-  showtimeId: number | null;
-  seatIds: string[];
+
+/** Represent the strictly constrained request accepted by the booking API. */
+export interface BookingRequest {
+  mobileNumber: string;
+  movieId: number;
+  theatreId: number;
+  seats: string[];
+  paymentMethod: 'CARD' | 'UPI';
+  totalPrice: 450;
+}
+
+/** Represent the persisted booking details returned after a committed write. */
+export interface BookingConfirmation {
+  bookingId: number;
+  confirmationId: string;
+  movie: Movie;
+  theatre: Theatre;
+  seats: string[];
+  paymentMethod: 'CARD' | 'UPI';
+  totalPrice: number;
 }

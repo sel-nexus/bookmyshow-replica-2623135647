@@ -6,29 +6,19 @@ interface IdRow { id: number; }
 /** Seed the required discovery catalog once and verify its persisted relationship integrity. */
 export function seedDiscovery(database: Database.Database): void {
   const seed = database.transaction((): void => {
-    const insertMovie = database.prepare(`
-      INSERT INTO movies (title, description, duration_minutes, language, certificate, release_date)
-      SELECT ?, ?, ?, ?, ?, ?
-      WHERE NOT EXISTS (SELECT 1 FROM movies WHERE title = ?)
-      ON CONFLICT DO NOTHING
-    `);
-    const insertTheatre = database.prepare(`
-      INSERT INTO theatres (name, city, address)
-      SELECT ?, ?, ?
-      WHERE NOT EXISTS (SELECT 1 FROM theatres WHERE name = ?)
-      ON CONFLICT DO NOTHING
-    `);
+    const insertMovie = database.prepare('INSERT INTO movies (title) VALUES (?) ON CONFLICT(title) DO NOTHING');
+    const insertTheatre = database.prepare('INSERT INTO theatres (name) VALUES (?) ON CONFLICT(name) DO NOTHING');
     const insertMapping = database.prepare(`
-      INSERT INTO movie_theatres (movie_id, theatre_id, show_time, price_cents)
-      VALUES (?, ?, '19:00', 45000)
-      ON CONFLICT(movie_id, theatre_id, show_time) DO NOTHING
+      INSERT INTO movie_theatres (movie_id, theatre_id)
+      VALUES (?, ?)
+      ON CONFLICT(movie_id, theatre_id) DO NOTHING
     `);
 
     for (const title of ['Paradise', 'Bloody Romeo', 'OG2']) {
-      insertMovie.run(title, `${title} is now showing.`, 150, 'Telugu', 'UA', '2026-01-01', title);
+      insertMovie.run(title);
     }
     for (const name of ['Sandhya 70mm', 'Sudharsham', 'Allu Cinemas']) {
-      insertTheatre.run(name, 'Hyderabad', `${name}, Hyderabad`, name);
+      insertTheatre.run(name);
     }
 
     const movieId = database.prepare('SELECT id FROM movies WHERE title = ?').pluck();

@@ -16,6 +16,27 @@ export interface Theatre {
   name: string;
 }
 
+/** Describe the fixed booking request accepted by the backend. */
+export interface BookingRequest {
+  mobileNumber: string;
+  movieId: number;
+  theatreId: number;
+  seats: string[];
+  paymentMethod: 'CARD' | 'UPI';
+  totalPrice: number;
+}
+
+/** Describe the backend confirmation returned after a successful booking write. */
+export interface BookingConfirmation {
+  bookingId: number;
+  confirmationId: string;
+  movie: Movie;
+  theatre: Theatre;
+  seats: string[];
+  paymentMethod: 'CARD' | 'UPI';
+  totalPrice: number;
+}
+
 /** Describe the stable API error returned by the backend. */
 export interface ApiErrorPayload {
   error: { code: string; message: string; requestId: string };
@@ -56,7 +77,7 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 /** Send a JSON POST request and normalize backend failures. */
-async function post<T>(path: string, body: Record<string, string>): Promise<T> {
+async function post<T>(path: string, body: object): Promise<T> {
   return requestJson<T>(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 }
 
@@ -81,5 +102,11 @@ export async function getMovies(): Promise<Movie[]> {
 /** Retrieve theatres mapped by the backend to one explicit movie identifier. */
 export async function getTheatres(movieId: number): Promise<{ movieId: number; theatres: Theatre[] }> {
   const response = await requestJson<{ data: { movieId: number; theatres: Theatre[] } }>(`/api/theatres?movieId=${encodeURIComponent(movieId)}`);
+  return response.data;
+}
+
+/** Submit only approved booking selection fields to the same-origin API. */
+export async function createBooking(booking: BookingRequest): Promise<BookingConfirmation> {
+  const response = await post<{ data: BookingConfirmation }>('/api/bookings', booking);
   return response.data;
 }

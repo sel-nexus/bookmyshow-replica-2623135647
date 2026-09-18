@@ -18,4 +18,5 @@ developer_metadata.json
 publish_manifest.yaml
 test_report.yaml
 graphify-out/cache/
+graphify-out/graphify-out/
 graphify-out/cost.json

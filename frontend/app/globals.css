@@ -42,5 +42,27 @@ button:disabled { cursor: not-allowed; opacity: 0.65; }
 .theatre-list { display: grid; gap: 14px; list-style: none; margin: 32px 0 0; padding: 0; }
 .theatre-card { align-items: center; display: flex; gap: 20px; justify-content: space-between; }
 .theatre-card h2 { margin-bottom: 0; }
-@media (max-width: 600px) { .theatre-card { align-items: stretch; flex-direction: column; } }
+.checkout-shell, .confirmation-card { width: min(100%, 1000px); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); padding: clamp(24px, 5vw, 48px); }
+.checkout-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr); gap: 24px; margin-top: 30px; }
+.seat-grid, .checkout-panel, .processing-view { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 16px; padding: 26px; }
+.seat-grid h2, .checkout-panel h2 { margin: 0; }
+.seats { display: flex; gap: 12px; margin: 24px 0; }
+.seat { align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; display: inline-flex; font-weight: 800; height: 48px; justify-content: center; width: 48px; }
+.seat-selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+.selection-summary { font-weight: 700; }
+.checkout-panel { display: grid; gap: 18px; }
+.checkout-panel fieldset { border: 0; display: flex; gap: 18px; margin: 0; padding: 0; }
+.checkout-panel legend { font-weight: 800; margin-bottom: 10px; }
+.checkout-panel fieldset label { align-items: center; display: flex; gap: 8px; }
+.checkout-panel fieldset input { margin: 0; width: auto; }
+.payment-fields { display: grid; gap: 12px; grid-template-columns: repeat(3, 1fr); }
+.checkout-total { align-items: center; border-top: 1px solid var(--border); display: flex; font-variant-numeric: tabular-nums; justify-content: space-between; padding-top: 16px; }
+.checkout-total strong { font-size: 1.25rem; }
+.processing-view { text-align: center; }
+.confirmation-card { text-align: center; }
+.confirmation-id { color: var(--primary); font-size: 1.2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+dl { display: grid; gap: 1px; margin: 30px auto 0; max-width: 480px; text-align: left; }
+dl div { align-items: center; background: var(--surface-raised); display: flex; justify-content: space-between; padding: 15px 18px; }
+dt { color: var(--foreground-muted); font-weight: 700; } dd { font-weight: 800; margin: 0; }
+@media (max-width: 600px) { .theatre-card, .checkout-columns { align-items: stretch; flex-direction: column; grid-template-columns: 1fr; } .payment-fields { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; } }

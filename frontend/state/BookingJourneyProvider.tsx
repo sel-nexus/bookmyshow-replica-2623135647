@@ -1,10 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
-import type { AuthUser, Movie, Theatre } from '../lib/api';
+import type { AuthUser, BookingConfirmation, Movie, Theatre } from '../lib/api';
 
 /** Represent the current visible stage of the booking journey. */
-export type JourneyPhase = 'login' | 'otp' | 'dashboard' | 'theatres';
+export type JourneyPhase = 'login' | 'otp' | 'dashboard' | 'theatres' | 'seating' | 'checkout' | 'processing' | 'confirmation';
 
 /** Describe the shared customer, booking selection, and confirmation state. */
 export interface BookingJourneyState {
@@ -18,6 +18,9 @@ export interface BookingJourneyState {
   selectedTheatre: Theatre | null;
   selectedShowtimeId: number | null;
   selectedSeatIds: string[];
+  totalPrice: number;
+  paymentMethod: 'CARD' | 'UPI' | null;
+  confirmation: BookingConfirmation | null;
   confirmationId: string | null;
   phase: JourneyPhase;
   setMobileNumber: (mobileNumber: string) => void;
@@ -25,6 +28,9 @@ export interface BookingJourneyState {
   setPhase: (phase: JourneyPhase) => void;
   setSelectedMovie: (movie: Movie | null) => void;
   setSelectedTheatre: (theatre: Theatre | null) => void;
+  selectFixedSeats: () => void;
+  setPaymentMethod: (paymentMethod: 'CARD' | 'UPI' | null) => void;
+  setConfirmation: (confirmation: BookingConfirmation | null) => void;
 }
 
 const BookingJourneyContext = createContext<BookingJourneyState | null>(null);
@@ -41,15 +47,20 @@ export function BookingJourneyProvider({ children }: { children: ReactNode }) {
   const selectedMovieId = selectedMovie?.id ?? null;
   const selectedTheatreId = selectedTheatre?.id ?? null;
   const [selectedShowtimeId] = useState<number | null>(null);
-  const [selectedSeatIds] = useState<string[]>([]);
-  const [confirmationId] = useState<string | null>(null);
+  const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState<'CARD' | 'UPI' | null>(null);
+  const [confirmation, setConfirmation] = useState<BookingConfirmation | null>(null);
+  const confirmationId = confirmation?.confirmationId ?? null;
 
   const value = useMemo<BookingJourneyState>(() => ({
     mobileNumber, token, user, selectedCity, selectedMovieId, selectedMovie, selectedTheatreId, selectedTheatre, selectedShowtimeId,
-    selectedSeatIds, confirmationId, phase, setMobileNumber,
+    selectedSeatIds, totalPrice, paymentMethod, confirmation, confirmationId, phase, setMobileNumber,
     completeVerification: (nextToken, nextUser) => { setToken(nextToken); setUser(nextUser); },
     setPhase, setSelectedMovie, setSelectedTheatre,
-  }), [mobileNumber, token, user, selectedCity, selectedMovieId, selectedMovie, selectedTheatreId, selectedTheatre, selectedShowtimeId, selectedSeatIds, confirmationId, phase]);
+    selectFixedSeats: () => { setSelectedSeatIds(['A1', 'A2', 'A3']); setTotalPrice(450); },
+    setPaymentMethod, setConfirmation,
+  }), [mobileNumber, token, user, selectedCity, selectedMovieId, selectedMovie, selectedTheatreId, selectedTheatre, selectedShowtimeId, selectedSeatIds, totalPrice, paymentMethod, confirmation, confirmationId, phase]);
 
   return <BookingJourneyContext.Provider value={value}>{children}</BookingJourneyContext.Provider>;
 }

@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      PORT: "4000"
+      SQLITE_PATH: /data/bookmyshow.db
+      JWT_SIGNING_SECRET: compose-demo-signing-secret-change-in-production
+      CORS_ORIGIN: http://localhost:3000
+      LOG_LEVEL: info
+    volumes:
+      - sqlite-data:/data
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      PORT: "3000"
+      BACKEND_ORIGIN: http://backend:4000
+      NEXT_PUBLIC_API_BASE_URL: ""
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  sqlite-data:
