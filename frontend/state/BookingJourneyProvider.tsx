@@ -57,7 +57,14 @@ export function BookingJourneyProvider({ children }: { children: ReactNode }) {
     mobileNumber, token, user, selectedCity, selectedMovieId, selectedMovie, selectedTheatreId, selectedTheatre, selectedShowtimeId,
     selectedSeatIds, totalPrice, paymentMethod, confirmation, confirmationId, phase, setMobileNumber,
     completeVerification: (nextToken, nextUser) => { setToken(nextToken); setUser(nextUser); },
-    setPhase, setSelectedMovie, setSelectedTheatre,
+    setPhase,
+    setSelectedMovie: (movie) => {
+      setSelectedMovie(movie);
+      setSelectedTheatre(null);
+      setSelectedSeatIds([]);
+      setTotalPrice(0);
+    },
+    setSelectedTheatre,
     selectFixedSeats: () => { setSelectedSeatIds(['A1', 'A2', 'A3']); setTotalPrice(450); },
     setPaymentMethod, setConfirmation,
   }), [mobileNumber, token, user, selectedCity, selectedMovieId, selectedMovie, selectedTheatreId, selectedTheatre, selectedShowtimeId, selectedSeatIds, totalPrice, paymentMethod, confirmation, confirmationId, phase]);

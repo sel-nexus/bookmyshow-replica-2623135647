@@ -50,7 +50,7 @@ describe('discovery pages', () => {
     expect(await screen.findByText('Mapped Screen')).toBeTruthy();
     await waitFor(() => expect(getTheatres).toHaveBeenCalledWith(7));
     fireEvent.click(screen.getByRole('button', { name: 'Choose Mapped Screen' }));
-    expect(push).toHaveBeenCalledWith('/checkout');
+    expect(push).toHaveBeenCalledWith('/seats');
   });
 
   it('renders the theatre empty state and does not offer continuation', async () => {

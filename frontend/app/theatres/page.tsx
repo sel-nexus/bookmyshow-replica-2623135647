@@ -9,7 +9,7 @@ import { useBookingJourney } from '../../state/BookingJourneyProvider';
 /** Load theatres solely for the movie explicitly selected in the booking journey. */
 export default function TheatresPage() {
   const router = useRouter();
-  const { token, selectedMovie, setSelectedTheatre } = useBookingJourney();
+  const { token, selectedMovie, setPhase, setSelectedTheatre } = useBookingJourney();
   const [theatres, setTheatres] = useState<Theatre[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -56,7 +56,8 @@ export default function TheatresPage() {
             theatres={theatres}
             onSelect={(theatre) => {
               setSelectedTheatre(theatre);
-              router.push('/checkout');
+              setPhase('seating');
+              router.push('/seats');
             }}
           />
         ) : null}

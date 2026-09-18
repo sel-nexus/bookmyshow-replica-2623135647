@@ -37,7 +37,7 @@ export default function DashboardPage() {
           <p role="alert">
             Your booking session is unavailable. Return to sign in and verify your mobile number to browse shows.
           </p>
-          <button type="button" onClick={() => router.push('/')}>Return to sign in</button>
+          <button type="button" onClick={() => router.push('/login')}>Return to sign in</button>
         </section>
       </main>
     );

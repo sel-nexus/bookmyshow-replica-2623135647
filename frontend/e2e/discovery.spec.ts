@@ -8,7 +8,7 @@ function captureBrowserErrors(page: Page) {
 }
 
 async function signIn(page: Page, waitForMovies = true) {
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByLabel('Mobile number').fill('9999999999');
   const [loginResponse] = await Promise.all([
     page.waitForResponse((response) => response.url().includes('/api/auth/login') && response.request().method() === 'POST'),
