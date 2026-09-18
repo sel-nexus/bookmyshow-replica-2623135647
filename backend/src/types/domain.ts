@@ -4,6 +4,18 @@ export interface User {
   mobileNumber: string;
 }
 
+/** Represents a movie available for discovery. */
+export interface Movie {
+  id: number;
+  title: string;
+}
+
+/** Represents a theatre available for a selected movie. */
+export interface Theatre {
+  id: number;
+  name: string;
+}
+
 /** Defines the subject encoded into an authentication token. */
 export interface AuthTokenPayload {
   sub: string;

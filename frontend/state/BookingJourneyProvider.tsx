@@ -1,10 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
-import type { AuthUser } from '../lib/api';
+import type { AuthUser, Movie, Theatre } from '../lib/api';
 
 /** Represent the current visible stage of the booking journey. */
-export type JourneyPhase = 'login' | 'otp' | 'dashboard';
+export type JourneyPhase = 'login' | 'otp' | 'dashboard' | 'theatres';
 
 /** Describe the shared customer, booking selection, and confirmation state. */
 export interface BookingJourneyState {
@@ -13,7 +13,9 @@ export interface BookingJourneyState {
   user: AuthUser | null;
   selectedCity: string | null;
   selectedMovieId: number | null;
+  selectedMovie: Movie | null;
   selectedTheatreId: number | null;
+  selectedTheatre: Theatre | null;
   selectedShowtimeId: number | null;
   selectedSeatIds: string[];
   confirmationId: string | null;
@@ -21,6 +23,8 @@ export interface BookingJourneyState {
   setMobileNumber: (mobileNumber: string) => void;
   completeVerification: (token: string, user: AuthUser) => void;
   setPhase: (phase: JourneyPhase) => void;
+  setSelectedMovie: (movie: Movie | null) => void;
+  setSelectedTheatre: (theatre: Theatre | null) => void;
 }
 
 const BookingJourneyContext = createContext<BookingJourneyState | null>(null);
@@ -32,18 +36,20 @@ export function BookingJourneyProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [phase, setPhase] = useState<JourneyPhase>('login');
   const [selectedCity] = useState<string | null>(null);
-  const [selectedMovieId] = useState<number | null>(null);
-  const [selectedTheatreId] = useState<number | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [selectedTheatre, setSelectedTheatre] = useState<Theatre | null>(null);
+  const selectedMovieId = selectedMovie?.id ?? null;
+  const selectedTheatreId = selectedTheatre?.id ?? null;
   const [selectedShowtimeId] = useState<number | null>(null);
   const [selectedSeatIds] = useState<string[]>([]);
   const [confirmationId] = useState<string | null>(null);
 
   const value = useMemo<BookingJourneyState>(() => ({
-    mobileNumber, token, user, selectedCity, selectedMovieId, selectedTheatreId, selectedShowtimeId,
+    mobileNumber, token, user, selectedCity, selectedMovieId, selectedMovie, selectedTheatreId, selectedTheatre, selectedShowtimeId,
     selectedSeatIds, confirmationId, phase, setMobileNumber,
     completeVerification: (nextToken, nextUser) => { setToken(nextToken); setUser(nextUser); },
-    setPhase,
-  }), [mobileNumber, token, user, selectedCity, selectedMovieId, selectedTheatreId, selectedShowtimeId, selectedSeatIds, confirmationId, phase]);
+    setPhase, setSelectedMovie, setSelectedTheatre,
+  }), [mobileNumber, token, user, selectedCity, selectedMovieId, selectedMovie, selectedTheatreId, selectedTheatre, selectedShowtimeId, selectedSeatIds, confirmationId, phase]);
 
   return <BookingJourneyContext.Provider value={value}>{children}</BookingJourneyContext.Provider>;
 }
