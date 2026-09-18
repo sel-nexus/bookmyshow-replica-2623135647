@@ -27,9 +27,9 @@ describe('authentication, discovery, and booking integration', () => {
     expect(movies.body.data.movies[0]).toEqual({ id: 1, title: 'Paradise' });
     const theatres = await request(app).get('/api/theatres?movieId=1');
     expect(theatres.body.data.theatres[0]).toEqual({ id: 1, name: 'Sandhya 70mm' });
-    const booking = await request(app).post('/api/bookings').send({ mobileNumber: '9876543210', movieId: 1, theatreId: 1, seats: ['A1', 'A2', 'A3'], paymentMethod: 'UPI', totalPrice: 450 });
+    const booking = await request(app).post('/api/bookings').send({ mobileNumber: '9876543210', movieId: 1, theatreId: 1, seats: ['B2', 'B3', 'B4'], paymentMethod: 'UPI', totalPrice: 450 });
     expect(booking.status).toBe(201);
-    expect(booking.body.data).toMatchObject({ confirmationId: 'BMS-1', movie: { title: 'Paradise' }, theatre: { name: 'Sandhya 70mm' }, paymentMethod: 'UPI' });
+    expect(booking.body.data).toMatchObject({ confirmationId: 'BMS-1', movie: { title: 'Paradise' }, theatre: { name: 'Sandhya 70mm' }, seats: ['B2', 'B3', 'B4'], paymentMethod: 'UPI', totalPrice: 450 });
     const recoveredConfirmation = await request(app).get(`/api/bookings/${booking.body.data.bookingId}`);
     expect(recoveredConfirmation.status).toBe(200);
     expect(recoveredConfirmation.body.data).toEqual(booking.body.data);
@@ -38,7 +38,7 @@ describe('authentication, discovery, and booking integration', () => {
   it('propagates an unmapped-theatre downstream error without creating a booking', async () => {
     const app = createApp(database, testConfig);
     await request(app).post('/api/auth/verify').send({ mobileNumber: '9876543210', otp: '1234' });
-    const booking = await request(app).post('/api/bookings').send({ mobileNumber: '9876543210', movieId: 1, theatreId: 2, seats: ['A1', 'A2', 'A3'], paymentMethod: 'CARD', totalPrice: 450 });
+    const booking = await request(app).post('/api/bookings').send({ mobileNumber: '9876543210', movieId: 1, theatreId: 2, seats: ['B2', 'B3', 'B4'], paymentMethod: 'CARD', totalPrice: 450 });
     expect(booking.status).toBe(404);
     expect(booking.body.error.code).toBe('ENTITY_NOT_FOUND');
     expect(database.prepare('SELECT COUNT(*) AS count FROM bookings').get()).toEqual({ count: 0 });
