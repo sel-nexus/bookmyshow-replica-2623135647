@@ -7898,8 +7898,8 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "_src": "backend_src_services_bookingservice_bookingservice_constructor",
-      "_tgt": "backend_src_repositories_bookingrepository_bookingrepository"
+      "_src": "backend_src_repositories_bookingrepository_bookingrepository",
+      "_tgt": "backend_src_services_bookingservice_bookingservice_constructor"
     },
     {
       "source": "backend_src_repositories_discoveryrepository_discoveryrepository",
@@ -7964,8 +7964,22 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "_src": "frontend_state_bookingjourneyprovider_bookingjourneystate",
-      "_tgt": "frontend_lib_api_bookingconfirmation"
+      "_src": "frontend_lib_api_bookingconfirmation",
+      "_tgt": "frontend_state_bookingjourneyprovider_bookingjourneystate"
+    },
+    {
+      "source": "frontend_package_dependencies_react",
+      "target": "frontend_tests_checkout_test_readyjourney",
+      "relation": "references",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/tests/checkout.test.tsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "_src": "frontend_package_dependencies_react",
+      "_tgt": "frontend_tests_checkout_test_readyjourney"
     },
     {
       "source": "frontend_package_dependencies_react",
@@ -7980,24 +7994,10 @@
       "_origin": "ast",
       "_src": "frontend_package_dependencies_react",
       "_tgt": "frontend_tests_discovery_test_authenticatedjourney"
-    },
-    {
-      "source": "frontend_package_dependencies_react",
-      "target": "frontend_tests_checkout_test_readyjourney",
-      "relation": "references",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "frontend/tests/checkout.test.tsx",
-      "source_location": "L18",
-      "weight": 1.0,
-      "_origin": "ast",
-      "_src": "frontend_tests_checkout_test_readyjourney",
-      "_tgt": "frontend_package_dependencies_react"
     }
   ],
   "metadata": {
-    "built_at": "2026-09-18T00:51:11.420631+00:00",
+    "built_at": "2026-09-18T00:52:40.801598+00:00",
     "version": "graph_update-v1",
     "codebase_root": "C:\\artifacts-v2\\T0132PcJVCRTV000417092623135647\\developer",
     "force": true,
