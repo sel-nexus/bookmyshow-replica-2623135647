@@ -35,6 +35,9 @@ test('unauthenticated theatre entry offers a return to browsing', async ({ page 
 test('customer signs in with an accepted one-time passcode', async ({ page }) => {
   const browserErrors = captureBrowserErrors(page);
   await page.goto('/');
+  await expect(page.getByRole('heading', { name: /movies, moments/i })).toBeVisible();
+  await page.getByRole('link', { name: 'Book tickets' }).click();
+  await expect(page).toHaveURL(/\/login$/);
   await page.getByLabel('Mobile number').fill('9999999999');
   const [loginResponse] = await Promise.all([
     page.waitForResponse((response) => response.url().includes('/api/auth/login') && response.request().method() === 'POST'),
@@ -56,7 +59,7 @@ test('customer signs in with an accepted one-time passcode', async ({ page }) =>
 /** Verify rejected OTPs remain readable without completing navigation. */
 test('customer sees an inline error for a rejected one-time passcode', async ({ page }) => {
   const browserErrors = captureBrowserErrors(page);
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByLabel('Mobile number').fill('9999999999');
   const [loginResponse] = await Promise.all([
     page.waitForResponse((response) => response.url().includes('/api/auth/login') && response.request().method() === 'POST'),

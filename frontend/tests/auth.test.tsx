@@ -39,25 +39,28 @@ describe('authentication forms', () => {
     expect(push).toHaveBeenCalledWith('/otp');
   });
 
-  it('renders a readable error when login fails', async () => {
-    vi.mocked(login).mockRejectedValue(new ApiError(400, 'INVALID_REQUEST', 'mobileNumber must be a non-empty string.'));
+  it('renders a readable API error after a valid mobile number is submitted', async () => {
+    vi.mocked(login).mockRejectedValue(new ApiError(400, 'INVALID_MOBILE', 'mobileNumber must contain exactly 10 numeric digits.'));
     renderWithJourney(<LoginForm />);
 
-    fireEvent.change(screen.getByLabelText('Mobile number'), { target: { value: 'bad' } });
+    fireEvent.change(screen.getByLabelText('Mobile number'), { target: { value: '9999999999' } });
     fireEvent.submit(screen.getByRole('button', { name: 'Continue' }).closest('form')!);
 
-    expect((await screen.findByRole('alert')).textContent).toContain('mobileNumber must be a non-empty string.');
+    expect((await screen.findByRole('alert')).textContent).toContain('mobileNumber must contain exactly 10 numeric digits.');
     expect(push).not.toHaveBeenCalled();
   });
 
-  it('guides the user to enter a mobile number without calling login or navigating', async () => {
+  it('rejects empty, short, long, and non-numeric mobile values before calling login', async () => {
     renderWithJourney(<LoginForm />);
+    const form = screen.getByRole('button', { name: 'Continue' }).closest('form')!;
 
-    fireEvent.submit(screen.getByRole('button', { name: 'Continue' }).closest('form')!);
-
-    expect((await screen.findByRole('alert')).textContent).toMatch(/mobile number|required|enter/i);
-    expect(login).not.toHaveBeenCalled();
-    expect(push).not.toHaveBeenCalled();
+    for (const mobileNumber of ['', '999999999', '99999999999', '99999abc99']) {
+      fireEvent.change(screen.getByLabelText('Mobile number'), { target: { value: mobileNumber } });
+      fireEvent.submit(form);
+      expect((await screen.findByRole('alert')).textContent).toContain('exactly 10 numeric digits');
+      expect(login).not.toHaveBeenCalled();
+      expect(push).not.toHaveBeenCalled();
+    }
   });
 
   it('guides the user to begin with a mobile number when the OTP session is missing', async () => {

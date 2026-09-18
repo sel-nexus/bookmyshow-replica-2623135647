@@ -15,14 +15,15 @@ export function LoginForm() {
   /** Submit a valid mobile number to the authentication API. */
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    if (!mobileNumber.trim()) {
-      setError('Enter your mobile number to continue.');
+    const normalizedMobileNumber = mobileNumber.trim();
+    if (!/^\d{10}$/.test(normalizedMobileNumber)) {
+      setError('Enter exactly 10 numeric digits to continue.');
       return;
     }
     setError('');
     setSubmitting(true);
     try {
-      const result = await login(mobileNumber.trim());
+      const result = await login(normalizedMobileNumber);
       setMobileNumber(result.mobileNumber);
       setPhase('otp');
       router.push('/otp');
@@ -36,7 +37,7 @@ export function LoginForm() {
   return <form onSubmit={handleSubmit} noValidate>
     <div>
       <label htmlFor="mobileNumber">Mobile number</label>
-      <input id="mobileNumber" name="mobileNumber" type="tel" autoComplete="tel" value={mobileNumber} onChange={(event) => setMobileNumber(event.target.value)} aria-required="true" aria-invalid={Boolean(error)} aria-describedby={error ? 'mobile-error' : undefined} />
+      <input id="mobileNumber" name="mobileNumber" type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} autoComplete="tel" value={mobileNumber} onChange={(event) => setMobileNumber(event.target.value)} aria-required="true" aria-invalid={Boolean(error)} aria-describedby={error ? 'mobile-error' : undefined} />
     </div>
     {error ? <p id="mobile-error" className="message message-error" role="alert">{error}</p> : null}
     <button type="submit" disabled={submitting}>{submitting ? 'Sending code…' : 'Continue'}</button>

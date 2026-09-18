@@ -1,14 +1,18 @@
-import { LoginForm } from '../components/LoginForm';
+import Link from 'next/link';
 
-/** Render the mobile-number login entry point for the booking journey. */
-export default function LoginPage() {
+/** Render the public, side-effect-free entry point for the booking journey. */
+export default function LandingPage() {
   return (
     <main>
-      <section className="auth-card" aria-labelledby="login-title">
+      <section className="auth-card landing-card" aria-labelledby="landing-title">
         <div className="brand">BookMyShow</div>
-        <h1 id="login-title">Find your next show.</h1>
-        <p>Enter your mobile number to receive a secure one-time passcode.</p>
-        <LoginForm />
+        <p className="eyebrow">YOUR NEXT BIG SCREEN MOMENT</p>
+        <h1 id="landing-title">Movies, moments, and your perfect seats.</h1>
+        <p>Discover the latest releases, choose your theatre, and reserve your show in a few clear steps.</p>
+        <div className="landing-actions" aria-label="Booking actions">
+          <Link className="button-primary" href="/login">Book tickets</Link>
+          <Link className="button-secondary" href="/login">Login</Link>
+        </div>
       </section>
     </main>
   );

@@ -50,12 +50,12 @@ describe('authentication API', () => {
     expect(response.headers['x-request-id']).toBeTruthy();
   });
 
-  it('rejects missing or non-string login request fields with correlated invalid-request errors', async () => {
+  it('rejects missing, nonnumeric, short, and long mobile values with correlated invalid-mobile errors', async () => {
     const app = createApp(database, testConfig);
-    for (const body of [{}, { mobileNumber: 123 }]) {
+    for (const body of [{}, { mobileNumber: 123 }, { mobileNumber: '999999999' }, { mobileNumber: '99999999999' }, { mobileNumber: '99999abc99' }]) {
       const response = await request(app).post('/api/auth/login').send(body);
       expect(response.status).toBe(400);
-      expect(response.body.error.code).toBe('INVALID_REQUEST');
+      expect(response.body.error.code).toBe('INVALID_MOBILE');
       expect(response.body.error.requestId).toBeTruthy();
     }
   });
