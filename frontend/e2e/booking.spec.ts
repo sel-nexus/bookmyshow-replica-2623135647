@@ -2,13 +2,17 @@ import { expect, test, type Page } from '@playwright/test';
 
 function captureBrowserErrors(page: Page) {
   const errors: string[] = [];
-  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
   page.on('pageerror', (error) => errors.push(error.message));
   return errors;
 }
 
 async function completeJourneyToPayment(page: Page) {
   await page.goto('/');
+  await page.getByRole('link', { name: 'Book tickets' }).click();
+  await expect(page).toHaveURL(/\/login$/);
   await page.getByLabel('Mobile number').fill('9999999999');
   const [loginResponse] = await Promise.all([
     page.waitForResponse((response) => response.url().includes('/api/auth/login') && response.request().method() === 'POST'),
@@ -27,7 +31,10 @@ async function completeJourneyToPayment(page: Page) {
   ]);
   expect(theatresResponse.ok()).toBeTruthy();
   await page.getByRole('button', { name: 'Choose Sandhya 70mm' }).click();
-  await page.getByRole('button', { name: 'Select seats' }).click();
+  for (const seat of ['B2', 'B3', 'B4']) {
+    await page.getByRole('button', { name: `Seat ${seat}` }).click();
+  }
+  await page.getByRole('button', { name: 'Continue to payment' }).click();
   await page.getByRole('radio', { name: 'UPI' }).check();
   await page.getByLabel('UPI ID').fill('demo@upi');
 }
@@ -48,12 +55,12 @@ test('customer completes the real booking journey and sees durable backend confi
   expect(booking.data.bookingId).toBeTruthy();
   await expect(page).toHaveURL(new RegExp(`/confirmation\\?bookingId=${booking.data.bookingId}$`));
   await expect(page.getByRole('heading', { name: 'Congratulations!' })).toBeVisible();
-  await expect(page.getByText(/^BMS-\d+$/)).toBeVisible();
-  await expect(page.getByText('Paradise')).toBeVisible();
-  await expect(page.getByText('Sandhya 70mm')).toBeVisible();
-  await expect(page.getByText('A1, A2, A3')).toBeVisible();
-  await expect(page.getByText('UPI')).toBeVisible();
-  await expect(page.getByText('Rs.450')).toBeVisible();
+  await expect(page.getByText(booking.data.confirmationId)).toBeVisible();
+  await expect(page.getByText(booking.data.movie.title)).toBeVisible();
+  await expect(page.getByText(booking.data.theatre.name)).toBeVisible();
+  await expect(page.getByText(booking.data.seats.join(', '))).toBeVisible();
+  await expect(page.getByText(booking.data.paymentMethod)).toBeVisible();
+  await expect(page.getByText(`Rs.${booking.data.totalPrice}`)).toBeVisible();
   await page.screenshot({ path: 'e2e/screenshots/booking-confirmation.png', fullPage: true });
   const [recoveryResponse] = await Promise.all([
     page.waitForResponse((response) => response.url().includes(`/api/bookings/${booking.data.bookingId}`) && response.request().method() === 'GET'),
@@ -81,7 +88,7 @@ test('direct confirmation access without journey state provides a recovery actio
   expect(errors).toEqual([]);
 });
 
-test('booking failure after the payment timer shows a recoverable error and no confirmation', async ({ page }) => {
+test('intercepted booking failure after the payment timer shows frontend recovery and no confirmation', async ({ page }) => {
   test.setTimeout(15_000);
   const errors = captureBrowserErrors(page);
   await completeJourneyToPayment(page);
@@ -98,7 +105,7 @@ test('booking failure after the payment timer shows a recoverable error and no c
   await expect(page.locator('.message-error')).toContainText(/request could not be completed|booking|try again|failed/i);
   await expect(page.getByRole('heading', { name: 'Congratulations!' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /pay|try again/i })).toBeVisible();
-  expect(errors.filter((error) => !error.includes('status of 500'))).toEqual([]);
+  expect(errors).toEqual([]);
 });
 
 test('payment controls remain available at a mobile viewport', async ({ page }) => {

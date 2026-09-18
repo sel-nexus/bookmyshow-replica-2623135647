@@ -39,23 +39,23 @@ describe('API client', () => {
     });
   });
 
-  it('posts a booking request and returns the persisted confirmation', async () => {
+  it('posts a valid exactly-three-seat booking and returns the persisted confirmation', async () => {
     const booking = {
       mobileNumber: '9999999999',
       movieId: 1,
       theatreId: 2,
-      seats: ['A1', 'A2'],
+      seats: ['B2', 'B3', 'B4'],
       paymentMethod: 'UPI' as const,
-      totalPrice: 300,
+      totalPrice: 450,
     };
     const confirmation = {
       bookingId: 7,
       confirmationId: 'BMS-7',
       movie: { id: 1, title: 'Interstellar' },
       theatre: { id: 2, name: 'Sandhya 70mm' },
-      seats: ['A1', 'A2'],
+      seats: ['B2', 'B3', 'B4'],
       paymentMethod: 'UPI' as const,
-      totalPrice: 300,
+      totalPrice: 450,
     };
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ data: confirmation }), { status: 201 }),
@@ -66,6 +66,35 @@ describe('API client', () => {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(booking),
+    });
+  });
+
+  it('normalizes an invalid booking response with its structured error', async () => {
+    const booking = {
+      mobileNumber: '9999999999',
+      movieId: 1,
+      theatreId: 2,
+      seats: ['B2', 'B3'],
+      paymentMethod: 'UPI' as const,
+      totalPrice: 300,
+    };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: {
+            code: 'INVALID_BOOKING',
+            message: 'Exactly three seats are required.',
+            requestId: 'req-booking',
+          },
+        }),
+        { status: 400 },
+      ),
+    );
+
+    await expect(createBooking(booking)).rejects.toMatchObject({
+      status: 400,
+      code: 'INVALID_BOOKING',
+      message: 'Exactly three seats are required.',
     });
   });
 

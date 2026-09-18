@@ -16,7 +16,7 @@ test('unauthenticated dashboard entry offers a return to sign-in', async ({ page
 
   await expect(page.getByText(/booking session is unavailable/i)).toBeVisible();
   await page.getByRole('button', { name: 'Return to sign in' }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/login$/);
   expect(browserErrors).toEqual([]);
 });
 
@@ -74,5 +74,5 @@ test('customer sees an inline error for a rejected one-time passcode', async ({ 
   expect(verifyResponse.ok()).toBeFalsy();
   await expect(page.locator('#otp-error')).toContainText('The supplied OTP was not accepted.');
   await expect(page).toHaveURL(/\/otp$/);
-  expect(browserErrors.filter((error) => !error.includes('status of 401'))).toEqual([]);
+  expect(browserErrors).toEqual([]);
 });

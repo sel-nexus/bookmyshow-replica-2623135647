@@ -61,7 +61,16 @@ export default function CheckoutPage() {
               <h1 id="checkout-title">Finish your cinema plan.</h1>
             </header>
             {error ? <p className="message message-error" role="alert">{error}</p> : null}
-            <div className="checkout-columns"><CheckoutPanel seats={journey.selectedSeatIds} totalPrice={journey.totalPrice} paymentMethod={journey.paymentMethod} processing={false} onPaymentMethodChange={journey.setPaymentMethod} onPay={pay} /></div>
+            <div className="checkout-columns">
+              <CheckoutPanel
+                seats={journey.selectedSeatIds}
+                totalPrice={journey.totalPrice}
+                paymentMethod={journey.paymentMethod}
+                processing={false}
+                onPaymentMethodChange={journey.setPaymentMethod}
+                onPay={pay}
+              />
+            </div>
           </>
         )}
       </section>
