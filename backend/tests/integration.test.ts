@@ -30,6 +30,9 @@ describe('authentication, discovery, and booking integration', () => {
     const booking = await request(app).post('/api/bookings').send({ mobileNumber: '9876543210', movieId: 1, theatreId: 1, seats: ['A1', 'A2', 'A3'], paymentMethod: 'UPI', totalPrice: 450 });
     expect(booking.status).toBe(201);
     expect(booking.body.data).toMatchObject({ confirmationId: 'BMS-1', movie: { title: 'Paradise' }, theatre: { name: 'Sandhya 70mm' }, paymentMethod: 'UPI' });
+    const recoveredConfirmation = await request(app).get(`/api/bookings/${booking.body.data.bookingId}`);
+    expect(recoveredConfirmation.status).toBe(200);
+    expect(recoveredConfirmation.body.data).toEqual(booking.body.data);
   });
 
   it('propagates an unmapped-theatre downstream error without creating a booking', async () => {
@@ -39,5 +42,19 @@ describe('authentication, discovery, and booking integration', () => {
     expect(booking.status).toBe(404);
     expect(booking.body.error.code).toBe('ENTITY_NOT_FOUND');
     expect(database.prepare('SELECT COUNT(*) AS count FROM bookings').get()).toEqual({ count: 0 });
+  });
+
+  it('enforces declared SQLite UNIQUE, NOT NULL, CHECK, foreign-key, and RESTRICT-delete constraints', async () => {
+    database.prepare("INSERT INTO users (mobile_number) VALUES ('9000000000')").run();
+    expect(() => database.prepare("INSERT INTO users (mobile_number) VALUES ('9000000000')").run()).toThrow();
+    expect(() => database.prepare('INSERT INTO movies (title) VALUES (NULL)').run()).toThrow();
+    expect(() => database.prepare("INSERT INTO bookings (user_id, movie_id, theatre_id, seats, payment_method, total_price) VALUES (1, 1, 1, '[]', 'CASH', 450)").run()).toThrow();
+    expect(() => database.prepare("INSERT INTO bookings (user_id, movie_id, theatre_id, seats, payment_method, total_price) VALUES (1, 1, 1, '[]', 'CARD', 449)").run()).toThrow();
+    expect(() => database.prepare("INSERT INTO bookings (user_id, movie_id, theatre_id, seats, payment_method, total_price) VALUES (999, 1, 1, '[]', 'CARD', 450)").run()).toThrow();
+
+    database.prepare("INSERT INTO bookings (user_id, movie_id, theatre_id, seats, payment_method, total_price) VALUES (1, 1, 1, '[]', 'CARD', 450)").run();
+    expect(() => database.prepare('DELETE FROM movies WHERE id = 1').run()).toThrow();
+    expect(() => database.prepare('DELETE FROM theatres WHERE id = 1').run()).toThrow();
+    expect(() => database.prepare('DELETE FROM users WHERE id = 1').run()).toThrow();
   });
 });

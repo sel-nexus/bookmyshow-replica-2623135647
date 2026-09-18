@@ -48,10 +48,11 @@ node node_modules/vitest/vitest.mjs run tests/checkout.test.tsx --environment js
 node node_modules/typescript/bin/tsc --noEmit
 ```
 
-The Playwright booking feature is deliberately not run by the commands above. When a browser is installed, run it against the real services with:
+Run the complete browser suite against real local services with:
 
 ```bash
-node frontend/node_modules/@playwright/test/cli.js test --config frontend/playwright.config.ts frontend/e2e/booking.spec.ts
+cd frontend
+node node_modules/@playwright/test/cli.js test --config playwright.config.ts
 ```
 
 ## API routes
@@ -62,6 +63,7 @@ node frontend/node_modules/@playwright/test/cli.js test --config frontend/playwr
 - `GET /api/movies`
 - `GET /api/theatres?movieId=1`
 - `POST /api/bookings` — `{ mobileNumber, movieId, theatreId, seats: ["A1","A2","A3"], paymentMethod: "CARD"|"UPI", totalPrice: 450 }`
+- `GET /api/bookings/:bookingId` — retrieves a committed confirmation for reload recovery.
 
 A successful booking returns `201` only after SQLite commits. Invalid booking details return `400 INVALID_BOOKING`; missing users, entities, or movie-theatre mappings return `404 ENTITY_NOT_FOUND`; unexpected write errors return `500 BOOKING_WRITE_FAILED` after rollback.
 

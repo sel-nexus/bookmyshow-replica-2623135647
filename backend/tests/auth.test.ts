@@ -80,17 +80,35 @@ describe('authentication API', () => {
     expect(database.prepare('SELECT COUNT(*) AS count FROM users').get()).toEqual({ count: 1 });
   });
 
-  it('rejects malformed verification requests and rejected OTPs with their contract statuses', async () => {
+  it('rejects each malformed verification request with a correlated invalid-request error', async () => {
     const app = createApp(database, testConfig);
-    const malformed = await request(app).post('/api/auth/verify').send({ mobileNumber: '9999999999' });
-    const rejected = await request(app).post('/api/auth/verify').send({ mobileNumber: '9999999999', otp: '0000' });
+    const malformedCases: Array<{ name: string; body: unknown }> = [
+      { name: 'missing mobile number', body: { otp: '1234' } },
+      { name: 'missing OTP', body: { mobileNumber: '9999999999' } },
+      { name: 'non-string mobile number', body: { mobileNumber: 9999999999, otp: '1234' } },
+      { name: 'non-string OTP', body: { mobileNumber: '9999999999', otp: 1234 } },
+      { name: 'empty mobile number', body: { mobileNumber: '', otp: '1234' } },
+      { name: 'empty OTP', body: { mobileNumber: '9999999999', otp: '' } },
+      { name: 'unexpected extra property', body: { mobileNumber: '9999999999', otp: '1234', role: 'admin' } },
+    ];
 
-    expect(malformed.status).toBe(400);
-    expect(malformed.body.error.code).toBe('INVALID_REQUEST');
-    expect(malformed.body.error.requestId).toBeTruthy();
-    expect(rejected.status).toBe(401);
-    expect(rejected.body.error.code).toBe('OTP_NOT_ACCEPTED');
-    expect(rejected.body.error.requestId).toBeTruthy();
+    for (const malformedCase of malformedCases) {
+      const response = await request(app).post('/api/auth/verify').send(malformedCase.body);
+
+      expect(response.status, malformedCase.name).toBe(400);
+      expect(response.body.error.code, malformedCase.name).toBe('INVALID_REQUEST');
+      expect(response.body.error.requestId, malformedCase.name).toEqual(expect.any(String));
+    }
+  });
+
+  it('rejects an unaccepted OTP with the OTP_NOT_ACCEPTED contract', async () => {
+    const response = await request(createApp(database, testConfig))
+      .post('/api/auth/verify')
+      .send({ mobileNumber: '9999999999', otp: '0000' });
+
+    expect(response.status).toBe(401);
+    expect(response.body.error.code).toBe('OTP_NOT_ACCEPTED');
+    expect(response.body.error.requestId).toBeTruthy();
   });
 
   it('returns an OK health status after querying SQLite', async () => {
@@ -99,5 +117,19 @@ describe('authentication API', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ data: { status: 'ok' } });
     expect(response.headers['x-request-id']).toBeTruthy();
+  });
+
+  it('returns the correlated DB_UNAVAILABLE contract when its real SQLite connection is closed', async () => {
+    const app = createApp(database, testConfig);
+    database.close();
+
+    const response = await request(app).get('/api/health');
+
+    expect(response.status).toBe(503);
+    expect(response.body.error).toEqual({
+      code: 'DB_UNAVAILABLE',
+      message: 'Database is unavailable.',
+      requestId: expect.any(String),
+    });
   });
 });

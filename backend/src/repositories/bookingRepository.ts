@@ -32,8 +32,8 @@ export class BookingRepository {
     return Number(result.lastInsertRowid);
   }
 
-  /** Select the written booking together with its persisted payment and joined details. */
-  public selectConfirmation(bookingId: number): BookingConfirmation {
+  /** Select a persisted booking confirmation with its joined movie, theatre, and payment details. */
+  public selectConfirmation(bookingId: number): BookingConfirmation | null {
     const record = this.database.prepare(`
       SELECT bookings.id AS bookingId, bookings.seats AS seatsJson, bookings.payment_method AS paymentMethod, bookings.total_price AS totalPrice,
              movies.id AS movieId, movies.title AS movieTitle, theatres.id AS theatreId, theatres.name AS theatreName
@@ -42,7 +42,7 @@ export class BookingRepository {
       INNER JOIN theatres ON theatres.id = bookings.theatre_id
       WHERE bookings.id = ?
     `).get(bookingId) as { bookingId: number; seatsJson: string; paymentMethod: 'CARD' | 'UPI'; totalPrice: number; movieId: number; movieTitle: string; theatreId: number; theatreName: string } | undefined;
-    if (!record) throw new Error('Inserted booking confirmation could not be selected.');
+    if (!record) return null;
     return { bookingId: record.bookingId, confirmationId: `BMS-${record.bookingId}`, movie: { id: record.movieId, title: record.movieTitle }, theatre: { id: record.theatreId, name: record.theatreName }, seats: JSON.parse(record.seatsJson) as string[], paymentMethod: record.paymentMethod, totalPrice: record.totalPrice };
   }
 }

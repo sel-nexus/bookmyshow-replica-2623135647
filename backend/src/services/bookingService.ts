@@ -24,6 +24,7 @@ export class BookingService {
       transactionStarted = true;
       const bookingId = this.repository.insertBooking(user.id, mappedScreen.movie.id, mappedScreen.theatre.id, JSON.stringify(canonicalSeats), booking.paymentMethod, booking.totalPrice);
       const confirmation = this.repository.selectConfirmation(bookingId);
+      if (!confirmation) throw new Error('Inserted booking confirmation was not found.');
       this.database.exec('COMMIT');
       transactionStarted = false;
       return confirmation;
@@ -37,6 +38,15 @@ export class BookingService {
       }
       throw new AppError(500, 'BOOKING_WRITE_FAILED', 'We could not save your booking. Please try again.');
     }
+  }
+
+  /** Retrieve a committed booking confirmation by its trusted numeric identifier. */
+  public getBookingConfirmation(bookingId: number): BookingConfirmation {
+    const confirmation = this.repository.selectConfirmation(bookingId);
+    if (!confirmation) {
+      throw new AppError(404, 'ENTITY_NOT_FOUND', 'The requested booking was not found.');
+    }
+    return confirmation;
   }
 
   /** Reject malformed or tampered client values before any database write. */

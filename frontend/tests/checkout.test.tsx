@@ -62,7 +62,7 @@ describe('checkout', () => {
     await act(async () => { await vi.advanceTimersByTimeAsync(1); });
     expect(createBooking).toHaveBeenCalledTimes(1);
     await act(async () => { await Promise.resolve(); });
-    expect(push).toHaveBeenCalledWith('/confirmation');
+    expect(push).toHaveBeenCalledWith('/confirmation?bookingId=7');
   });
 
   it('returns to checkout with a readable error and no confirmation after booking failure', async () => {

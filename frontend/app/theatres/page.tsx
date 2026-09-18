@@ -29,7 +29,38 @@ export default function TheatresPage() {
   }, [token, selectedMovie]);
 
   if (!token || !selectedMovie) {
-    return <main><section className="journey-card" aria-labelledby="theatres-title"><div className="brand">BookMyShow</div><h1 id="theatres-title">Choose a movie first.</h1><p role="alert">We need an active signed-in session and movie selection before theatres can be loaded.</p><button type="button" onClick={() => router.push('/dashboard')}>Browse movies</button></section></main>;
+    return (
+      <main>
+        <section className="journey-card" aria-labelledby="theatres-title">
+          <div className="brand">BookMyShow</div>
+          <h1 id="theatres-title">Choose a movie first.</h1>
+          <p role="alert">
+            We need an active signed-in session and movie selection before theatres can be loaded.
+          </p>
+          <button type="button" onClick={() => router.push('/dashboard')}>Browse movies</button>
+        </section>
+      </main>
+    );
   }
-  return <main><section className="discovery-shell" aria-labelledby="theatres-title"><div className="brand">Theatres for {selectedMovie.title}</div><h1 id="theatres-title">Find your preferred screen.</h1><p>Only theatres mapped to your selected movie are shown.</p>{loading ? <p role="status">Loading theatres…</p> : null}{error ? <p className="message message-error" role="alert">{error}</p> : null}{!loading && !error ? <TheatreList theatres={theatres} onSelect={(theatre) => { setSelectedTheatre(theatre); router.push('/checkout'); }} /> : null}</section></main>;
+
+  return (
+    <main>
+      <section className="discovery-shell" aria-labelledby="theatres-title">
+        <div className="brand">Theatres for {selectedMovie.title}</div>
+        <h1 id="theatres-title">Find your preferred screen.</h1>
+        <p>Only theatres mapped to your selected movie are shown.</p>
+        {loading ? <p role="status">Loading theatres…</p> : null}
+        {error ? <p className="message message-error" role="alert">{error}</p> : null}
+        {!loading && !error ? (
+          <TheatreList
+            theatres={theatres}
+            onSelect={(theatre) => {
+              setSelectedTheatre(theatre);
+              router.push('/checkout');
+            }}
+          />
+        ) : null}
+      </section>
+    </main>
+  );
 }

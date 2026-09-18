@@ -15,6 +15,7 @@ import { DiscoveryRepository } from './repositories/discoveryRepository';
 import { AuthService } from './services/authService';
 import { BookingService } from './services/bookingService';
 import { DiscoveryService } from './services/discoveryService';
+import { AppError } from './types/domain';
 
 /** Create the Express application with injectable dependencies for file-backed database tests. */
 export function createApp(database: Database.Database, configuration: AppConfig): Application {
@@ -32,8 +33,8 @@ export function createApp(database: Database.Database, configuration: AppConfig)
     try {
       database.prepare('SELECT 1').get();
       response.status(200).json({ data: { status: 'ok' } });
-    } catch (error: unknown) {
-      next(error);
+    } catch (_error: unknown) {
+      next(new AppError(503, 'DB_UNAVAILABLE', 'Database is unavailable.'));
     }
   });
   app.use('/api/auth', createAuthRouter(authService));

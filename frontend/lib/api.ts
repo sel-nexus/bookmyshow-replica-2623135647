@@ -110,3 +110,9 @@ export async function createBooking(booking: BookingRequest): Promise<BookingCon
   const response = await post<{ data: BookingConfirmation }>('/api/bookings', booking);
   return response.data;
 }
+
+/** Retrieve a persisted booking confirmation for a reload-safe confirmation view. */
+export async function getBookingConfirmation(bookingId: string): Promise<BookingConfirmation> {
+  const response = await requestJson<{ data: BookingConfirmation }>(`/api/bookings/${encodeURIComponent(bookingId)}`);
+  return response.data;
+}

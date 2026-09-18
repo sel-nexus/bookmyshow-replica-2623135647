@@ -37,6 +37,30 @@ describe('booking API', () => {
     expect(database.prepare('SELECT user_id, movie_id, theatre_id, seats, payment_method, total_price FROM bookings').get()).toEqual({ user_id: 1, movie_id: 1, theatre_id: 1, seats: '["A1","A2","A3"]', payment_method: 'CARD', total_price: 450 });
   });
 
+  it('retrieves the exact persisted confirmation after creating a booking', async () => {
+    const app = createApp(database, testConfig);
+    const created = await request(app).post('/api/bookings').send({ ...validBooking, paymentMethod: 'UPI' });
+    const retrieved = await request(app).get(`/api/bookings/${created.body.data.bookingId}`);
+
+    expect(retrieved.status).toBe(200);
+    expect(retrieved.body.data).toEqual(created.body.data);
+    expect(retrieved.body.data.paymentMethod).toBe('UPI');
+  });
+
+  it.each(['0', '-1', '1.5', 'abc', '1e2'])('rejects malformed booking IDs with a correlated validation error', async (bookingId) => {
+    const response = await request(createApp(database, testConfig)).get(`/api/bookings/${bookingId}`);
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toMatchObject({ code: 'INVALID_BOOKING_ID', requestId: expect.any(String) });
+  });
+
+  it('returns a correlated not-found error for an unknown booking ID', async () => {
+    const response = await request(createApp(database, testConfig)).get('/api/bookings/999');
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toMatchObject({ code: 'ENTITY_NOT_FOUND', requestId: expect.any(String) });
+  });
+
   it.each([
     { ...validBooking, seats: ['A2', 'A1', 'A3'] },
     { ...validBooking, totalPrice: 449 },
@@ -61,6 +85,47 @@ describe('booking API', () => {
     expect(response.status).toBe(500);
     expect(response.body.error.code).toBe('BOOKING_WRITE_FAILED');
     expect(response.body.data).toBeUndefined();
+    expect(bookingCount(database)).toBe(0);
+  });
+
+  it.each([
+    ['missing mobileNumber', { movieId: 1, theatreId: 1, seats: ['A1', 'A2', 'A3'], paymentMethod: 'CARD', totalPrice: 450 }],
+    ['missing movieId', { mobileNumber: '9999999999', theatreId: 1, seats: ['A1', 'A2', 'A3'], paymentMethod: 'CARD', totalPrice: 450 }],
+    ['missing theatreId', { mobileNumber: '9999999999', movieId: 1, seats: ['A1', 'A2', 'A3'], paymentMethod: 'CARD', totalPrice: 450 }],
+    ['missing seats', { mobileNumber: '9999999999', movieId: 1, theatreId: 1, paymentMethod: 'CARD', totalPrice: 450 }],
+    ['missing paymentMethod', { mobileNumber: '9999999999', movieId: 1, theatreId: 1, seats: ['A1', 'A2', 'A3'], totalPrice: 450 }],
+    ['missing totalPrice', { mobileNumber: '9999999999', movieId: 1, theatreId: 1, seats: ['A1', 'A2', 'A3'], paymentMethod: 'CARD' }],
+    ['null body', null],
+    ['primitive body', 'booking'],
+    ['array body', []],
+    ['string movie ID', { ...validBooking, movieId: '1' }],
+    ['fractional theatre ID', { ...validBooking, theatreId: 1.5 }],
+    ['blank mobile number', { ...validBooking, mobileNumber: '   ' }],
+    ['extra key', { ...validBooking, admin: true }],
+    ['SQL-shaped movie ID', { ...validBooking, movieId: '1 OR 1=1' }],
+    ['XSS-shaped theatre ID', { ...validBooking, theatreId: '<script>alert(1)</script>' }],
+  ])('rejects %s with a stable error and no durable booking write', async (_caseName, payload) => {
+    const response = await request(createApp(database, testConfig)).post('/api/bookings').send(payload);
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toMatchObject({ code: 'INVALID_BOOKING', requestId: expect.any(String) });
+    expect(response.body.data).toBeUndefined();
+    expect(bookingCount(database)).toBe(0);
+  });
+
+  it('rejects JSON bodies above 32KB with a correlated error and no durable booking write', async () => {
+    const oversizedJson = JSON.stringify({ ...validBooking, padding: 'x'.repeat(33 * 1024) });
+    const response = await request(createApp(database, testConfig))
+      .post('/api/bookings')
+      .set('Content-Type', 'application/json')
+      .send(oversizedJson);
+
+    expect(response.status).toBe(413);
+    expect(response.body.error).toEqual({
+      code: 'PAYLOAD_TOO_LARGE',
+      message: 'Request payload exceeds the 32KB limit.',
+      requestId: expect.any(String),
+    });
     expect(bookingCount(database)).toBe(0);
   });
 });

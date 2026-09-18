@@ -56,4 +56,27 @@ describe('discovery API', () => {
     database.prepare("INSERT INTO movies (title) VALUES ('Unmapped')").run();
     expect((await request(app).get('/api/theatres?movieId=1')).body).toEqual({ data: { movieId: 1, theatres: [] } });
   });
+
+  it('rejects SQL-shaped movie IDs as literals and does not broaden discovery results', async () => {
+    seedDiscovery(database);
+    const response = await request(createApp(database, testConfig)).get('/api/theatres?movieId=1%20OR%201%3D1');
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toMatchObject({ code: 'INVALID_MOVIE_ID', requestId: expect.any(String) });
+    expect(database.prepare('SELECT COUNT(*) AS count FROM movies').get()).toEqual({ count: 3 });
+  });
+
+  it('returns a correlated stable internal error when the real movies repository table is unavailable', async () => {
+    seedDiscovery(database);
+    database.exec('ALTER TABLE movies RENAME TO movies_unavailable');
+
+    const response = await request(createApp(database, testConfig)).get('/api/movies');
+
+    expect(response.status).toBe(500);
+    expect(response.body.error).toEqual({
+      code: 'INTERNAL_ERROR',
+      message: 'An unexpected error occurred.',
+      requestId: expect.any(String),
+    });
+  });
 });

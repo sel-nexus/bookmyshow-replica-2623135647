@@ -50,6 +50,42 @@ describe('authentication forms', () => {
     expect(push).not.toHaveBeenCalled();
   });
 
+  it('guides the user to enter a mobile number without calling login or navigating', async () => {
+    renderWithJourney(<LoginForm />);
+
+    fireEvent.submit(screen.getByRole('button', { name: 'Continue' }).closest('form')!);
+
+    expect((await screen.findByRole('alert')).textContent).toMatch(/mobile number|required|enter/i);
+    expect(login).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it('guides the user to begin with a mobile number when the OTP session is missing', async () => {
+    renderWithJourney(<OtpForm />);
+
+    fireEvent.submit(screen.getByRole('button', { name: 'Verify and continue' }).closest('form')!);
+
+    expect((await screen.findByRole('alert')).textContent).toMatch(/mobile number|session|start|login/i);
+    expect(verifyOtp).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it('guides the user to enter an OTP without calling verification or navigating', async () => {
+    vi.mocked(login).mockResolvedValue({ accepted: true, mobileNumber: '9999999999' });
+    renderWithJourney(<><LoginForm /><OtpForm /></>);
+
+    fireEvent.change(screen.getByLabelText('Mobile number'), { target: { value: '9999999999' } });
+    fireEvent.submit(screen.getByRole('button', { name: 'Continue' }).closest('form')!);
+    await waitFor(() => expect(login).toHaveBeenCalledWith('9999999999'));
+    push.mockReset();
+
+    fireEvent.submit(screen.getByRole('button', { name: 'Verify and continue' }).closest('form')!);
+
+    expect((await screen.findByRole('alert')).textContent).toMatch(/passcode|otp|required|enter/i);
+    expect(verifyOtp).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+  });
+
   it('submits a code only after the OTP form is submitted and navigates after verification', async () => {
     vi.mocked(login).mockResolvedValue({ accepted: true, mobileNumber: '9999999999' });
     vi.mocked(verifyOtp).mockResolvedValue({ token: 'server-token', user: { id: 1, mobileNumber: '9999999999' } });
